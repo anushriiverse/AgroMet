@@ -58,3 +58,15 @@ Thumbs.db
 
 # Demo outputs
 outputs/demo_flagship_downscaled.csv
+
+# ── D9-2 Explicit Exclusions (Large Rasters, GeoJSONs, Credentials) ───────────
+data/cache/srtm_domain_30m.tif
+data/cache/srtm_30m_tiles/
+data/cache/srtm_domain_250m.tif
+data/engine_cache/
+test_tile*.tif
+outputs/rainfall_downscaled_250m.tif
+data/cache/geojson/
+figs/
+.earthengine/
+*earthengine*credential*
