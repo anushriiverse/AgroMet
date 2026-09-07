@@ -210,10 +210,28 @@ All 16,943 revenue villages across the domain were evaluated for geographic incl
 > Outside-band values (8,309 villages, primarily in northern Karnataka and all of Maharashtra) are spatial extrapolations of an orographic advection rule calibrated strictly within the Karnataka barrier cross-section ($12.8^\circ\text{--}15.3^\circ\text{N}$). While physically continuous, they have not been independently anchored against Maharashtra or northern ground climatologies. All 402 Goa villages exceed 3,300 mm because the coastal anchor was fitted from Karnataka coastal gauges only; no Goa gauge exists in the calibration set, so Goa totals are unvalidated and may be biased high. Validating the northern extension would require long-term JJAS gauge records in the 15.3–17.6°N band; while GHCN station IN022030400 (Bombay/Santacruz, ~19.1°N) was identified earlier during feasibility checks, it lies outside even the extended domain.
 
 
+### Comprehensive Village Coverage & Extrapolation Table
+
+| Metric | Threshold or Definition | Village Count | Percent of 16,943 |
+| :--- | :--- | :---: | :---: |
+| **Validated Band Primary Deliverable** | Centroid latitude within $12.8^\circ\text{--}15.3^\circ\text{N}$ (`inside_validated_band = True`) | **8,634** | **50.96%** |
+| **Active Orographic Enhancement** | Downscaled JJAS $> 349.9\text{ mm}$ (anchored $318.1\text{ mm}$ rain-shadow floor $+ 10\%$) | **11,338** | **66.92%** |
+| **High Seasonal Rainfall Coverage** | Downscaled JJAS $> 1,000.0\text{ mm}$ | **6,067** | **35.81%** |
+| **Substantive Spatial Extrapolation** | Latitude outside $12.8^\circ\text{--}15.3^\circ\text{N}$ and downscaled JJAS $> 349.9\text{ mm}$ | **5,099** | **30.10%** |
+
+> [!NOTE]
+> **Authoritative Reconciliation on 6,070 vs. 6,067**:
+> In `outputs/village_rainfall.csv`, counting villages with downscaled JJAS yields:
+> - Exactly equal to $1,000.0\text{ mm}$ (`== 1000.0`): **0 villages**
+> - Strictly greater than $1,000.0\text{ mm}$ (`> 1000.0`): **6,067 villages** ($35.81\%$)
+> - Greater than or equal to $1,000.0\text{ mm}$ (`>= 1000.0`): **6,067 villages** ($35.81\%$)
+>
+> The comparison operator (`>` vs. `>=`) yields identical counts (6,067) and does not account for the difference between 6,070 and 6,067. The origin of the 6,070 figure is unresolved. **6,067 is the exact and authoritative count** of villages exceeding $1,000\text{ mm}$ on disk.
+
 ### Where the Model Adds Information:
 - **Within 10% of Rain Shadow Floor ($\le 349.9\text{ mm}$)**: **5,605 villages** ($33.08\%$)
 - **Above Rain Shadow Floor (> 349.9 mm, Active Orographic Enhancement)**: **11,338 villages** ($66.92\%$)
-- **Exceeding 1,000 mm**: **6,067 villages** ($35.81\%$; reconciling earlier approximate citation of 6,070 villages)
+- **Exceeding 1,000 mm**: **6,067 villages** ($35.81\%$)
 - **Exceeding 2,000 mm**: **3,965 villages** ($23.40\%$)
 - **Median Village Rainfall**: **501.0 mm** (Mean: **1,314.1 mm**)
 
