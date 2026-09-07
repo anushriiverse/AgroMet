@@ -26,7 +26,7 @@ python rebuild_village_corrections.py
 
 > [!NOTE]
 > **Repository Context & Workstream Separation**:
-> This branch (`feature/temperature-eto-downscaling`) was created from the `release/` snapshot tree that contains shared and historical files from earlier project tracks. It deliberately does **not** contain the outputs of the high-resolution orographic rainfall downscaling workstream (`outputs/rainfall_downscaled_250m.tif`, `outputs/village_rainfall.csv`, `figs/`, or `docs/demo_summary.md`), which live in a separate tree. Those rainfall artifacts reside on the main prototype workspace and are maintained independently.
+> This branch (`feature/temperature-eto-downscaling`) was created from the `release/` snapshot tree that contains shared and historical files from earlier project tracks. It deliberately does **not** contain the outputs of the high-resolution orographic rainfall downscaling workstream (`outputs/rainfall_downscaled_250m.tif`, `outputs/village_rainfall.csv`, `figs/`, or `docs/demo_summary.md`), which live in a separate tree. Those rainfall artifacts reside on the main prototype workspace and are maintained independently. Additionally, the protected audit log `logs/item_h6_h13.log` lives only in the parent workspace, is not part of this branch, and is not required for any reproduction step.
 
 ---
 
@@ -40,8 +40,8 @@ The downscaling engine extracts the true fine-scale surface elevation for every 
 
 ## 2. File Manifest Tables
 
-### Table 2.1: Temperature/ETo Critical Path (26 Files)
-The following 26 files constitute the exact dependency set identified in D9-1 required to generate, execute, and verify `outputs/village_corrections.csv`:
+### Table 2.1: Temperature/ETo Workstream (26 files)
+Only the five files listed in the quickstart are required to regenerate outputs/village_corrections.csv, while the remaining files in the table are analysis, validation and configuration belonging to the same workstream.
 
 | File Path | Specific Functional Purpose |
 | :--- | :--- |
@@ -51,9 +51,9 @@ The following 26 files constitute the exact dependency set identified in D9-1 re
 | `rebuild_village_corrections.py` | Authoritative offline rebuild script that injects authentic daily extremes from `in_window_daily_extremes.npz` and compiles the verified final table. |
 | `compute_in_window_b42_b43_b44.py` | Extraction script parsing authentic 24-hour daily extremes from ERA5 atmospheric slices for 2017-07-15 (monsoon) and 2018-04-30 (pre-monsoon). |
 | `rebuild_node_grid.py` | Extraction script computing 0.25° grid node coordinates and corresponding ERA5 and SRTM node elevations across the Western Ghats domain. |
-| `run_pipeline_b1_b10.py` | Automated regression runner executing boundary assertions, physical range guards, and validation checks. |
-| `compute_g0.py` | Statistical analysis script computing relief distribution percentiles, top-decile relief nodes ($P_{90} \ge 617.3\text{ m}$), and materiality classifications. |
-| `demo_flagship.py` | Demonstration script generating single-node demonstration tables for the flagship high-relief node $(15.75^\circ\text{N}, 74.00^\circ\text{E})$. |
+| `run_pipeline_b1_b10.py` | Analysis/validation script executing boundary assertions, physical range guards, and regression checks (not on reproduction path). |
+| `compute_g0.py` | Analysis/validation script evaluating relief distribution percentiles, top-decile relief nodes ($P_{90} \ge 617.3\text{ m}$), and relief materiality (not on reproduction path). |
+| `demo_flagship.py` | Analysis/validation script generating single-node demonstration tables for flagship node $(15.75^\circ\text{N}, 74.00^\circ\text{E})$ (not on reproduction path). |
 | `data/cache/signed_village_results.json` | Intermediate cache artifact storing Google Earth Engine 30 m SRTM polygon-mean elevations and signed $\Delta z$ for all 16,943 villages (3.16 MB). |
 | `data/cache/in_window_daily_extremes.npz` | Intermediate cache artifact containing gridded 2-meter air temperature extremes ($T_{\max}, T_{\min}, T_{\text{mean}}$) across ERA5 grid nodes for 2017-07-15 and 2018-04-30 (8.19 KB). |
 | `data/cache/node_orography_grids.npz` | Intermediate cache artifact storing gridded coarse orography heights ($z_{\text{ERA5}}$ and $z_{\text{SRTM\_node}}$) across the 0.25° domain (6.45 KB). |
@@ -100,7 +100,7 @@ The following 71 files are part of the shared repository snapshot inherited from
 | `logs/item_as_bb.log` | Records verification of Items AS through BB validating the 16,943 village polygon boundary topology and centroid-to-cell mappings. |
 | `logs/item_b0_b16.log` | Records verification of Items B0 through B16 establishing the initial village elevation reduction, signed relief $\Delta z$, and materiality filters. |
 | `logs/item_b17_b25.log` | Records verification of Items B17 through B25 evaluating flagship high-relief node exhibits and checking multi-cell village boundary flags. |
-| `logs/item_b26_b10.log` | Records verification of Items B26 through B10 auditing village census code duplication, location code mappings, and cadastral survey identifiers. |
+| `logs/item_b26_b10.log` | Malformed filename (descending range); contents record Muduba/domain extreme offsets (B26–B27), quarantine lift Update 12, Hargreaves-Samani adoption (B4), and pipeline outputs/materiality verification (B1–B10). |
 | `logs/item_b28_b34.log` | Records verification of Items B28 through B34 evaluating temperature adjustments across top-decile relief nodes and testing extreme heat stress criteria. |
 | `logs/item_b35_b39.log` | Records verification of Items B35 through B39 establishing that Karnataka state survey codes are internal identifiers rather than official Census codes. |
 | `logs/item_b40_b48.log` | Records verification of Items B40 through B48 verifying authentic 24-hr daily extremes for pre-monsoon and monsoon windows and deprecating out-of-window slices. |
