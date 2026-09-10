@@ -70,3 +70,8 @@ data/cache/geojson/
 figs/
 .earthengine/
 *earthengine*credential*
+app/.env.local
+app/node_modules
+.env.local
+app/dist
+dist
