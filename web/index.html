@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroMet Downscaling Map</title>
+  <!-- MapLibre GL JS CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Fullscreen map -->
+  <div id="map"></div>
+
+  <!-- Frosted Search Box (Top-Left) -->
+  <div class="search-container">
+    <input type="text" id="search-input" class="search-input" placeholder="Search a village" autocomplete="off" />
+    <div id="search-dropdown" class="search-dropdown hidden"></div>
+  </div>
+
+  <!-- Frosted Glass Panel (Top-Right) -->
+  <div class="glass-panel" id="glass-panel">
+    <div class="panel-header">
+      <div id="village-name" class="village-name">Tallur</div>
+      <div id="village-state" class="village-state">Karnataka</div>
+      <div id="domain-notice" class="domain-notice hidden"></div>
+    </div>
+    
+    <div id="temperature" class="temperature-display">
+      20.4<span class="temperature-unit">°C</span>
+    </div>
+    
+    <hr class="panel-divider" />
+    
+    <div class="stat-row">
+      <span class="stat-label">ETo</span>
+      <span id="stat-eto" class="stat-value">2.1 mm/day</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Rainfall</span>
+      <span id="stat-rainfall" class="stat-value">5996 mm JJAS</span>
+    </div>
+    
+    <div id="panel-note" class="panel-note">
+      Seasonal JJAS values downscaled from ERA5 0.25 degree reanalysis using 30 m SRTM terrain; rainfall calibrated against 19 NOAA GHCN gauges. Rainfall estimate lies within the 12.8-15.3N gauge-validated band (19-gauge calibrated). Nearest village is Tallur at a distance of 0.0 km.
+    </div>
+    
+    <div id="badge-pill" class="badge-pill badge-validated">
+      Gauge-validated band
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

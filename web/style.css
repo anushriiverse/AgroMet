@@ -1,0 +1,235 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  color: #0f172a;
+  background-color: #e2e8f0;
+}
+
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Frosted Search Container */
+.search-container {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 320px;
+  z-index: 20;
+}
+
+.search-input {
+  width: 100%;
+  padding: 13px 20px;
+  font-size: 15px;
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  outline: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.search-input::placeholder {
+  color: #64748b;
+}
+
+.search-input:focus {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.search-dropdown.hidden {
+  display: none;
+}
+
+.search-item {
+  padding: 11px 18px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s ease;
+}
+
+.search-item:last-child {
+  border-bottom: none;
+}
+
+.search-item:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.search-item-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.search-item-state {
+  font-size: 12px;
+  color: #64748b;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.search-item.muted {
+  color: #64748b;
+  font-size: 13px;
+  justify-content: center;
+}
+
+/* Frosted Glass Panel */
+.glass-panel {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 300px;
+  padding: 24px 22px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+  z-index: 20;
+}
+
+.panel-header {
+  margin-bottom: 12px;
+}
+
+.village-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.village-state {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.domain-notice {
+  font-size: 12px;
+  color: #9a3412;
+  background: rgba(251, 146, 60, 0.2);
+  border: 1px solid rgba(249, 115, 22, 0.35);
+  padding: 8px 10px;
+  border-radius: 10px;
+  margin-top: 10px;
+  line-height: 1.35;
+}
+
+.domain-notice.hidden {
+  display: none;
+}
+
+.temperature-display {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  color: #0f172a;
+  line-height: 1;
+  margin: 14px 0 16px 0;
+}
+
+.temperature-unit {
+  font-size: 24px;
+  font-weight: 400;
+  vertical-align: super;
+  margin-left: 3px;
+  color: #475569;
+}
+
+.panel-divider {
+  border: 0;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  margin: 14px 0;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stat-value {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.panel-note {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 14px 0 16px 0;
+}
+
+.badge-pill {
+  display: block;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.badge-validated {
+  background: rgba(16, 185, 129, 0.18);
+  color: #065f46;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.badge-unvalidated {
+  background: rgba(245, 158, 11, 0.18);
+  color: #92400e;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}

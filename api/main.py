@@ -1,4 +1,4 @@
-﻿import os
+import os
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -92,7 +92,7 @@ def predict(
     v_val_band = bool(row["inside_validated_band"])
 
     sentences = [
-        "Values represent JJAS seasonal means downscaled from ERA5 reanalysis and CHIRPS satellite observations."
+        "Seasonal JJAS values downscaled from ERA5 0.25 degree reanalysis using 30 m SRTM terrain; rainfall calibrated against 19 NOAA GHCN gauges."
     ]
     if v_val_band:
         sentences.append("Rainfall estimate lies within the 12.8-15.3N gauge-validated band (19-gauge calibrated).")
@@ -147,8 +147,7 @@ def search(q: str = Query("", description="Village name substring to search")):
 def model_info():
     return {
         "rainfall": {
-            "mae_mm": 312.4,
-            "mape_pct": 11.5,
+            "median_ape_pct": 11.5,
             "unanchored_mape_pct": 19.2,
             "windward_mape_pct": 9.1,
             "leeward_mape_pct": 31.9,
@@ -159,7 +158,8 @@ def model_info():
         },
         "temperature": {
             "method": "physics-first lapse rate + XGBoost residual",
-            "stations": ["Mahabaleshwar", "Satara", "Kolhapur"],
+            "validation_split": "leave-one-station-out",
+            "stations": ["Aurangpur", "Bhatsanagar_1", "Natuwadi Dam_1"],
             "loso_mae_baseline_c": 2.13,
             "loso_mae_corrected_c": 1.63,
             "pct_improvement": 23.6,
