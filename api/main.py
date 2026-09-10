@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import List
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, Query
@@ -46,28 +47,26 @@ DOMAIN_LAT_MAX = 17.550
 DOMAIN_LON_MIN = 73.448
 DOMAIN_LON_MAX = 76.552
 
-REFERENCE_STATIONS = [
-    {"village_id": "station:IN009181800", "name": "Agumbe", "state": "KA", "lat": 13.530, "lon": 75.080},
-    {"village_id": "station:IN009183600", "name": "Agumbe Obsy", "state": "KA", "lat": 13.500, "lon": 75.100},
-    {"village_id": "station:IN009181600", "name": "Hulikal", "state": "KA", "lat": 13.730, "lon": 75.020},
-    {"village_id": "station:IN009120100", "name": "Karwar", "state": "KA", "lat": 14.783, "lon": 74.133},
-    {"village_id": "station:IN009061000", "name": "Sringeri", "state": "KA", "lat": 13.420, "lon": 75.250},
-    {"village_id": "station:IN012131800", "name": "Kolhapur", "state": "MH", "lat": 16.700, "lon": 74.233},
-    {"village_id": "station:IN009060500", "name": "Chickmagalur", "state": "KA", "lat": 13.330, "lon": 75.770},
-    {"village_id": "station:IN009180200", "name": "Shimoga", "state": "KA", "lat": 13.930, "lon": 75.630},
-    {"village_id": "station:IN009181200", "name": "Sagar", "state": "KA", "lat": 14.170, "lon": 75.030},
-    {"village_id": "station:IN009180400", "name": "Thirthahalli", "state": "KA", "lat": 13.680, "lon": 75.230},
-    {"village_id": "station:IN009060801", "name": "Mudigere", "state": "KA", "lat": 13.130, "lon": 75.630},
-    {"village_id": "station:IN009120400", "name": "Honavar", "state": "KA", "lat": 14.283, "lon": 74.450},
-    {"village_id": "station:IN009120300", "name": "Kumta", "state": "KA", "lat": 14.420, "lon": 74.420},
-    {"village_id": "station:IN009120200", "name": "Ankola", "state": "KA", "lat": 14.670, "lon": 74.300},
-    {"village_id": "station:IN009130500", "name": "Baindur", "state": "KA", "lat": 13.870, "lon": 74.630},
-    {"village_id": "station:IN009120101", "name": "Bhatkal", "state": "KA", "lat": 13.980, "lon": 74.550},
-    {"village_id": "station:IN009063400", "name": "Kottigehar Toll", "state": "KA", "lat": 13.080, "lon": 75.500},
-    {"village_id": "station:IN009181101", "name": "Jog Pt.Colony", "state": "KA", "lat": 14.170, "lon": 74.750},
-    {"village_id": "station:IN009181501", "name": "Hosanagar", "state": "KA", "lat": 13.920, "lon": 75.050},
-    {"village_id": "station:IN009070100", "name": "Chitradurga", "state": "KA", "lat": 14.233, "lon": 76.433},
-]
+# Load optional gauge transect data if present on disk
+GAUGE_PATH = BASE_DIR / "data" / "rain_stations_transect.csv"
+if not GAUGE_PATH.exists():
+    GAUGE_PATH = Path("outputs/rain_stations_transect.csv")
+if not GAUGE_PATH.exists():
+    GAUGE_PATH = BASE_DIR.parent / "outputs" / "rain_stations_transect.csv"
+
+GAUGES_LIST = []
+if GAUGE_PATH.exists():
+    gdf = pd.read_csv(GAUGE_PATH)
+    if "name" in gdf.columns and "latitude" in gdf.columns and "longitude" in gdf.columns:
+        for _, r in gdf.iterrows():
+            GAUGES_LIST.append({
+                "village_id": str(r.get("id", "")),
+                "name": str(r["name"]).strip(),
+                "state": str(r.get("zone", "")),
+                "lat": round(float(r["latitude"]), 5),
+                "lon": round(float(r["longitude"]), 5),
+                "type": "gauge"
+            })
 
 
 def haversine_vectorized(query_lat: float, query_lon: float) -> np.ndarray:
@@ -148,35 +147,29 @@ def predict(
 
 
 @app.get("/api/search")
-def search(q: str = Query("", description="Village name substring to search")):
+def search(q: str = Query("", description="Search query")):
     query = q.strip().lower()
     if not query:
         return []
 
     results = []
-    # Check reference stations first
-    for st in REFERENCE_STATIONS:
-        if query in st["name"].lower():
-            results.append({
-                "village_id": st["village_id"],
-                "name": st["name"],
-                "state": st["state"],
-                "lat": st["lat"],
-                "lon": st["lon"]
-            })
+    # Search gauge stations from file if available
+    for g in GAUGES_LIST:
+        if query in g["name"].lower():
+            results.append(g)
 
     # Search village table
     matches = df[df["name_lower"].str.contains(query, regex=False)]
     for _, row in matches.iterrows():
         if len(results) >= 8:
             break
-        # Avoid duplicate names at same coords
         results.append({
             "village_id": str(row["village_id"]),
             "name": str(row["name"]),
             "state": str(row["state"]),
             "lat": round(float(row["lat"]), 5),
-            "lon": round(float(row["lon"]), 5)
+            "lon": round(float(row["lon"]), 5),
+            "type": "village"
         })
 
     return results[:8]
