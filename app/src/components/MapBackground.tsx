@@ -66,7 +66,7 @@ export const MapBackground: React.FC<MapBackgroundProps> = ({ center, onPick }) 
   useEffect(() => {
     if (mapRef.current && markerRef.current) {
       markerRef.current.setLngLat([center.lon, center.lat]);
-      mapRef.current.easeTo({ center: [center.lon, center.lat] });
+      mapRef.current.flyTo({ center: [center.lon, center.lat], essential: true });
     }
   }, [center.lat, center.lon]);
 

@@ -94,7 +94,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   </span>
                   <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-white tracking-tight">
                     {isMr ? 'नमस्ते,' : 'Namaste,'}
-                    <span className="block mt-0.5 text-secondary-fixed">{farmerDisplayName}</span>
+                    <span className="block mt-0.5 text-secondary-fixed">{farmerDisplayName} (demo profile)</span>
                   </h1>
                 </div>
                 <div className="flex items-center gap-1 mt-1 text-surface-bright/90">
@@ -102,7 +102,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     location_on
                   </span>
                   <span className="text-xs truncate">
-                    {farmerProfile.panchayat || 'Radhanagari Gram Panchayat, Kolhapur'}
+                    {farmerProfile.panchayat || 'Radhanagari Gram Panchayat'} (demo profile)
                   </span>
                 </div>
               </div>
@@ -121,16 +121,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
             {/* Live Telemetry Weather Card */}
             <section className="relative rounded-2xl overflow-hidden bg-primary-container/95 border border-primary-fixed/20 shadow-xl text-on-primary backdrop-blur-md p-4 flex flex-col gap-3.5">
-              <div className="flex items-center justify-between">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/10">
-                  <span className="w-2 h-2 rounded-full bg-secondary-fixed animate-ping"></span>
-                  <span className="text-xs text-white font-semibold">
-                    {isMr ? 'थेट राधानगरी हवामान' : 'Live Radhanagari Telemetry'}
-                  </span>
-                </div>
-                <span className="text-xs text-surface-bright/80">
-                  {isMr ? '१० मिनिटांपूर्वी' : 'Updated 10m ago'}
-                </span>
+              <div className="text-xs text-surface-bright/70 font-medium">
+                Model output · seasonal mean (JJAS)
               </div>
 
               <div className="flex items-center justify-between">

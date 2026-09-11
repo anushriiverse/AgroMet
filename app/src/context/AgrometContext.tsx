@@ -8,6 +8,7 @@ interface AgrometContextValue {
   error: string | null;
   currentCoords: { lat: number; lon: number };
   isOutOfDomain: boolean;
+  domainFallbackNote: string | null;
   setLocation: (lat: number, lon: number) => Promise<void>;
 }
 
@@ -23,6 +24,7 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [error, setError] = useState<string | null>(null);
   const [currentCoords, setCurrentCoords] = useState(DEFAULT_COORDS);
   const [isOutOfDomain, setIsOutOfDomain] = useState<boolean>(false);
+  const [domainFallbackNote, setDomainFallbackNote] = useState<string | null>(null);
 
   const fetchPredictionForLocation = useCallback(async (lat: number, lon: number) => {
     setLoading(true);
@@ -47,10 +49,13 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (info) setModelInfoData(info);
     });
 
-    // 2. Immediately fetch default location so prediction is never null
-    fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
+    const fallbackToDefault = (reason?: string) => {
+      setIsOutOfDomain(true);
+      setDomainFallbackNote('showing Kolhapur — your location is outside the model domain');
+      fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
+    };
 
-    // 3. Geolocation refinement if available
+    // 2. Call navigator.geolocation.getCurrentPosition before falling back
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -64,16 +69,21 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
           if (inside) {
             setIsOutOfDomain(false);
+            setDomainFallbackNote(null);
             fetchPredictionForLocation(lat, lon);
           } else {
-            setIsOutOfDomain(true);
+            console.log('GPS coords outside model domain:', lat, lon);
+            fallbackToDefault('outside domain');
           }
         },
-        () => {
-          // Denied or timeout: default already loaded
+        (err) => {
+          console.warn('GPS error / denied:', err.message);
+          fallbackToDefault('denied or error');
         },
-        { timeout: 5000 }
+        { timeout: 3000 }
       );
+    } else {
+      fallbackToDefault('no geolocation API');
     }
   }, [fetchPredictionForLocation]);
 
@@ -86,6 +96,7 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
         error,
         currentCoords,
         isOutOfDomain,
+        domainFallbackNote,
         setLocation,
       }}
     >

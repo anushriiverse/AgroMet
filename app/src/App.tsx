@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AgrometProvider, useAgromet } from './context/AgrometContext';
 import { MapBackground } from './components/MapBackground';
+import { MapSearchBox } from './components/MapSearchBox';
+import { MapGlassPanel } from './components/MapGlassPanel';
 import { AppLanguage, AppScreen, FarmerProfile, CropItem } from './types';
 import { DEFAULT_FARMER_PROFILE, INITIAL_CROPS } from './data/mockData';
 import { LanguageModal } from './components/LanguageModal';
@@ -32,9 +34,20 @@ export default function App() {
 }
 
 function ParamAppShell() {
-  const { prediction, currentCoords, setLocation } = useAgromet();
+  const { prediction, loading, currentCoords, setLocation, domainFallbackNote } = useAgromet();
   const [sheetOpen, setSheetOpen] = useState<boolean>(false);
+  const [windowWidth, setWindowWidth] = useState<number>(() =>
+    typeof window !== 'undefined' ? window.innerWidth : 1200
+  );
   const touchStartY = useRef<number | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowWidth < 768;
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
@@ -147,24 +160,41 @@ function ParamAppShell() {
       {/* 1. MapBackground mounted once as first child */}
       <MapBackground center={currentCoords} onPick={setLocation} />
 
-      {/* 2. AppSheet wrapping the PARAM app */}
+      {/* 2. Search box & Glass panel on map layer (zIndex: 20, hidden when sheet is FULL) */}
+      {!sheetOpen && (
+        <>
+          <MapSearchBox
+            onSelectResult={(lat, lon) => setLocation(lat, lon)}
+            isMobile={isMobile}
+          />
+          {!isMobile && (
+            <MapGlassPanel
+              prediction={prediction}
+              loading={loading}
+              domainFallbackNote={domainFallbackNote}
+            />
+          )}
+        </>
+      )}
+
+      {/* 3. AppSheet wrapping the PARAM app */}
       <div
         className="app-sheet pointer-events-auto"
         style={{
           position: 'fixed',
-          left: '50%',
-          transform: 'translateX(-50%)',
+          left: sheetOpen ? 0 : (isMobile ? 0 : '50%'),
+          transform: sheetOpen ? 'none' : (isMobile ? 'none' : 'translateX(-50%)'),
           bottom: 0,
-          width: '100%',
-          maxWidth: '430px',
+          width: sheetOpen ? '100vw' : '100%',
+          maxWidth: sheetOpen ? '100vw' : (isMobile ? '100%' : '430px'),
+          height: sheetOpen ? '100vh' : '140px',
           zIndex: 10,
-          borderRadius: '24px 24px 0 0',
+          borderRadius: sheetOpen ? 0 : '24px 24px 0 0',
           background: 'rgba(255, 255, 255, 0.92)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.18)',
-          height: sheetOpen ? '92vh' : '140px',
-          transition: 'height 300ms cubic-bezier(0.32, 0.72, 0, 1)',
+          transition: 'all 300ms cubic-bezier(0.32, 0.72, 0, 1)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -184,7 +214,7 @@ function ParamAppShell() {
             </div>
 
             {/* Current village name + taluka line and current temp */}
-            <div className="flex items-center justify-between pb-3 px-1">
+            <div className="flex items-center justify-between pb-2 px-1">
               <div className="min-w-0 flex-1 pr-3">
                 <div className="flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-[20px] text-primary">location_on</span>
@@ -197,6 +227,11 @@ function ParamAppShell() {
                     ? `${prediction.state} • Elev: ${prediction.elevation_m.toFixed(0)}m • ${prediction.inside_validated_band ? 'Validated' : 'Extrapolated'}`
                     : 'Kolhapur, Maharashtra'}
                 </p>
+                {domainFallbackNote && (
+                  <p className="text-[10px] text-amber-700 font-medium pl-6 truncate mt-0.5">
+                    {domainFallbackNote}
+                  </p>
+                )}
               </div>
 
               <div className="text-right shrink-0">
@@ -211,7 +246,7 @@ function ParamAppShell() {
           </div>
         )}
 
-        {/* FULL STATE (sheetOpen = true): height 92vh */}
+        {/* FULL STATE (sheetOpen = true): height 100vh */}
         {sheetOpen && (
           <div className="w-full h-full flex flex-col relative overflow-hidden">
             {/* Top drag bar / chevron to collapse */}
