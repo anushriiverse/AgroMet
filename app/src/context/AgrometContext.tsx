@@ -10,6 +10,7 @@ interface AgrometContextValue {
   isOutOfDomain: boolean;
   domainFallbackNote: string | null;
   setLocation: (lat: number, lon: number) => Promise<void>;
+  requestLocation: () => void;
 }
 
 const DEFAULT_COORDS = { lat: 16.700, lon: 74.233 }; // Kolhapur
@@ -25,6 +26,9 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [currentCoords, setCurrentCoords] = useState(DEFAULT_COORDS);
   const [isOutOfDomain, setIsOutOfDomain] = useState<boolean>(false);
   const [domainFallbackNote, setDomainFallbackNote] = useState<string | null>(null);
+
+  // Ref tracking whether a genuine GPS fix (or explicit user selection) has succeeded
+  const hasRealFix = React.useRef<boolean>(false);
 
   const fetchPredictionForLocation = useCallback(async (lat: number, lon: number) => {
     setLoading(true);
@@ -48,7 +52,72 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const setLocation = useCallback(async (lat: number, lon: number) => {
+    // Explicit user action marks hasRealFix to prevent late fallbacks from overwriting
+    hasRealFix.current = true;
     await fetchPredictionForLocation(lat, lon);
+  }, [fetchPredictionForLocation]);
+
+  const requestLocation = useCallback(() => {
+    if (!('geolocation' in navigator)) {
+      if (!hasRealFix.current) {
+        setIsOutOfDomain(false);
+        setDomainFallbackNote(null);
+        fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
+      }
+      return;
+    }
+
+    const handleSuccess = (pos: GeolocationPosition) => {
+      hasRealFix.current = true;
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      const inside =
+        lat >= DOMAIN.latMin &&
+        lat <= DOMAIN.latMax &&
+        lon >= DOMAIN.lonMin &&
+        lon <= DOMAIN.lonMax;
+
+      if (inside) {
+        setIsOutOfDomain(false);
+        setDomainFallbackNote(null);
+        fetchPredictionForLocation(lat, lon);
+      } else {
+        console.log('GPS coords actually fell outside model domain:', lat, lon);
+        setIsOutOfDomain(true);
+        setDomainFallbackNote('showing Kolhapur — your location is outside the model domain');
+        fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
+      }
+    };
+
+    const handleAttempt2Error = (err: GeolocationPositionError) => {
+      console.warn('GPS attempt 2 failed:', err.message);
+      // Kolhapur fallback must only ever run when GPS has definitively failed both attempts
+      // and only if no real fix has succeeded
+      if (!hasRealFix.current) {
+        console.warn('Definitively failed both GPS attempts; falling back to Kolhapur default');
+        setIsOutOfDomain(false);
+        setDomainFallbackNote(null);
+        fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
+      }
+    };
+
+    const handleAttempt1Error = (err: GeolocationPositionError) => {
+      console.warn('GPS attempt 1 failed, starting attempt 2:', err.message);
+      if (hasRealFix.current) return;
+      // Attempt 2: low accuracy, timeout 15000ms, maximumAge 60000ms
+      navigator.geolocation.getCurrentPosition(
+        handleSuccess,
+        handleAttempt2Error,
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
+      );
+    };
+
+    // Attempt 1: high accuracy, timeout 8000ms, maximumAge 0
+    navigator.geolocation.getCurrentPosition(
+      handleSuccess,
+      handleAttempt1Error,
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
   }, [fetchPredictionForLocation]);
 
   useEffect(() => {
@@ -57,45 +126,9 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (info) setModelInfoData(info);
     });
 
-    // 2. Call navigator.geolocation.getCurrentPosition before falling back
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          const inside =
-            lat >= DOMAIN.latMin &&
-            lat <= DOMAIN.latMax &&
-            lon >= DOMAIN.lonMin &&
-            lon <= DOMAIN.lonMax;
-
-          if (inside) {
-            setIsOutOfDomain(false);
-            setDomainFallbackNote(null);
-            fetchPredictionForLocation(lat, lon);
-          } else {
-            console.log('GPS coords actually fell outside model domain:', lat, lon);
-            // Only set when GPS fix actually fell outside 12.948–17.550°N / 73.448–76.552°E
-            setIsOutOfDomain(true);
-            setDomainFallbackNote('showing Kolhapur — your location is outside the model domain');
-            fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
-          }
-        },
-        (err) => {
-          console.warn('GPS error / denied:', err.message);
-          // If denied or timed out, default to Kolhapur WITHOUT the "outside model domain" banner
-          setIsOutOfDomain(false);
-          setDomainFallbackNote(null);
-          fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
-        },
-        { timeout: 3000 }
-      );
-    } else {
-      setIsOutOfDomain(false);
-      setDomainFallbackNote(null);
-      fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
-    }
-  }, [fetchPredictionForLocation]);
+    // 2. Initial position resolution via retry chain
+    requestLocation();
+  }, [requestLocation]);
 
   return (
     <AgrometContext.Provider
@@ -108,6 +141,7 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
         isOutOfDomain,
         domainFallbackNote,
         setLocation,
+        requestLocation,
       }}
     >
       {children}

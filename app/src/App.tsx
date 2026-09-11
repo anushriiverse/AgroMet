@@ -34,7 +34,8 @@ export default function App() {
 }
 
 function ParamAppShell() {
-  const { prediction, loading, currentCoords, setLocation, domainFallbackNote } = useAgromet();
+  const { prediction, loading, currentCoords, setLocation, domainFallbackNote, requestLocation } = useAgromet();
+  const [showSplash, setShowSplash] = useState<boolean>(true);
   const [sheetOpen, setSheetOpen] = useState<boolean>(false);
   const [windowWidth, setWindowWidth] = useState<number>(() =>
     typeof window !== 'undefined' ? window.innerWidth : 1200
@@ -72,8 +73,8 @@ function ParamAppShell() {
 
   const [currentScreen, setCurrentScreen] = useState<AppScreen>(() => {
     const saved = localStorage.getItem('param_screen');
-    // Default to splash screen on app start
-    return (saved as AppScreen) || 'splash';
+    // Default to home screen on app start (splash is rendered topmost overlay)
+    return (saved as AppScreen) && saved !== 'splash' ? (saved as AppScreen) : 'home';
   });
 
   const [farmerProfile, setFarmerProfile] = useState<FarmerProfile>(() => {
@@ -157,8 +158,17 @@ function ParamAppShell() {
 
   return (
     <div className="w-full h-screen overflow-hidden relative bg-transparent pointer-events-none">
+      {/* PARAM Splash: topmost fixed overlay, auto-dismisses with minimum hold 1200ms and 400ms fadeout */}
+      {showSplash && (
+        <SplashScreen onDismiss={() => setShowSplash(false)} />
+      )}
+
       {/* 1. MapBackground mounted once as first child */}
-      <MapBackground center={currentCoords} onPick={setLocation} />
+      <MapBackground
+        center={currentCoords}
+        onPick={setLocation}
+        onLocate={requestLocation}
+      />
 
       {/* 2. Search box & Glass panel on map layer (zIndex: 20, hidden when sheet is FULL) */}
       {!sheetOpen && (
@@ -167,13 +177,12 @@ function ParamAppShell() {
             onSelectResult={(lat, lon) => setLocation(lat, lon)}
             isMobile={isMobile}
           />
-          {!isMobile && (
-            <MapGlassPanel
-              prediction={prediction}
-              loading={loading}
-              domainFallbackNote={domainFallbackNote}
-            />
-          )}
+          <MapGlassPanel
+            prediction={prediction}
+            loading={loading}
+            domainFallbackNote={domainFallbackNote}
+            isMobile={isMobile}
+          />
         </>
       )}
 
@@ -285,9 +294,11 @@ function ParamAppShell() {
             >
         {/* Render Screen according to currentScreen */}
         {currentScreen === 'splash' && (
-          <SplashScreen
-            onStart={() => navigateTo('language')}
+          <HomeScreen
+            onNavigate={(screen) => navigateTo(screen)}
             language={language}
+            farmerProfile={farmerProfile}
+            onOpenProfile={() => navigateTo('profile_view')}
             onToggleLanguage={() => setIsLanguageModalOpen(true)}
           />
         )}
@@ -297,7 +308,7 @@ function ParamAppShell() {
             currentLanguage={language}
             onSelectLanguage={(lang) => setLanguage(lang)}
             onContinue={() => navigateTo('add_location')}
-            onBack={() => navigateTo('splash')}
+            onBack={() => navigateTo('home')}
           />
         )}
 

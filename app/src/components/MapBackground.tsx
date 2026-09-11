@@ -5,9 +5,10 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 interface MapBackgroundProps {
   center: { lat: number; lon: number };
   onPick: (lat: number, lon: number) => void;
+  onLocate?: () => void;
 }
 
-export const MapBackground: React.FC<MapBackgroundProps> = ({ center, onPick }) => {
+export const MapBackground: React.FC<MapBackgroundProps> = ({ center, onPick, onLocate }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
   const markerRef = useRef<Marker | null>(null);
@@ -71,10 +72,23 @@ export const MapBackground: React.FC<MapBackgroundProps> = ({ center, onPick }) 
   }, [center.lat, center.lon]);
 
   return (
-    <div
-      ref={containerRef}
-      className="fixed inset-0 z-0 pointer-events-auto"
-      style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 0 }}
-    />
+    <>
+      <div
+        ref={containerRef}
+        className="fixed inset-0 z-0 pointer-events-auto"
+        style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 0 }}
+      />
+      {onLocate && (
+        <button
+          onClick={onLocate}
+          aria-label="Locate me"
+          title="Locate me"
+          className="fixed right-4 bottom-[156px] md:bottom-8 w-12 h-12 rounded-full bg-white/90 hover:bg-white text-neutral-700 hover:text-primary shadow-lg border border-white/60 backdrop-blur-md flex items-center justify-center pointer-events-auto active:scale-95 transition-all z-20"
+          style={{ zIndex: 20, width: '48px', height: '48px' }}
+        >
+          <span className="material-symbols-outlined text-[24px]">my_location</span>
+        </button>
+      )}
+    </>
   );
 };
