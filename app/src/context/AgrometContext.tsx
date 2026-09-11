@@ -33,6 +33,14 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const pred = await predict(lat, lon);
     if (pred) {
       setPrediction(pred);
+      // Clear domain banner on any successful in-domain location
+      if (pred.in_domain) {
+        setIsOutOfDomain(false);
+        setDomainFallbackNote(null);
+      } else {
+        setIsOutOfDomain(true);
+        setDomainFallbackNote('showing Kolhapur — your location is outside the model domain');
+      }
     } else {
       setError('Failed to load prediction from AgroMet API');
     }
@@ -48,12 +56,6 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
     fetchModelInfo().then((info) => {
       if (info) setModelInfoData(info);
     });
-
-    const fallbackToDefault = (reason?: string) => {
-      setIsOutOfDomain(true);
-      setDomainFallbackNote('showing Kolhapur — your location is outside the model domain');
-      fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
-    };
 
     // 2. Call navigator.geolocation.getCurrentPosition before falling back
     if ('geolocation' in navigator) {
@@ -72,18 +74,26 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
             setDomainFallbackNote(null);
             fetchPredictionForLocation(lat, lon);
           } else {
-            console.log('GPS coords outside model domain:', lat, lon);
-            fallbackToDefault('outside domain');
+            console.log('GPS coords actually fell outside model domain:', lat, lon);
+            // Only set when GPS fix actually fell outside 12.948–17.550°N / 73.448–76.552°E
+            setIsOutOfDomain(true);
+            setDomainFallbackNote('showing Kolhapur — your location is outside the model domain');
+            fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
           }
         },
         (err) => {
           console.warn('GPS error / denied:', err.message);
-          fallbackToDefault('denied or error');
+          // If denied or timed out, default to Kolhapur WITHOUT the "outside model domain" banner
+          setIsOutOfDomain(false);
+          setDomainFallbackNote(null);
+          fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
         },
         { timeout: 3000 }
       );
     } else {
-      fallbackToDefault('no geolocation API');
+      setIsOutOfDomain(false);
+      setDomainFallbackNote(null);
+      fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
     }
   }, [fetchPredictionForLocation]);
 

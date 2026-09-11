@@ -39,7 +39,7 @@ export const MapGlassPanel: React.FC<MapGlassPanelProps> = ({
       }}
     >
       {/* Domain fallback note if triggered */}
-      {domainFallbackNote && (
+      {domainFallbackNote && prediction?.in_domain === false && (
         <div className="mb-2.5 px-2.5 py-1 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-tight font-medium">
           {domainFallbackNote}
         </div>

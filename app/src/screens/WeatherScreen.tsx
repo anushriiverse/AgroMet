@@ -47,7 +47,7 @@ export const WeatherScreen: React.FC<WeatherScreenProps> = ({
       <div className="relative z-10">
         <Header
           title={prediction ? `${prediction.name}, ${prediction.state}` : (isMr ? 'हवामान अंदाज (७ दिवस)' : '7-Day Weather')}
-          subtitle={prediction ? `Elevation: ${prediction.elevation_m.toFixed(0)}m • ${prediction.inside_validated_band ? 'Validated Band' : 'Outside Band'}` : 'Radhanagari, Kolhapur (MH)'}
+          subtitle={prediction ? `Elevation: ${prediction.elevation_m.toFixed(0)}m • ${prediction.inside_validated_band ? 'Validated Band' : 'Outside Band'}` : 'Sajani, MH'}
           language={language}
           onToggleLanguage={onToggleLanguage}
           onOpenProfile={onOpenProfile}
@@ -64,7 +64,7 @@ export const WeatherScreen: React.FC<WeatherScreenProps> = ({
               {prediction ? `${prediction.name} Forecast` : (isMr ? 'स्थानिक हवामान अंदाज' : 'Local Forecast')}
             </h1>
             <p className="text-xs text-on-surface-variant drop-shadow-xs">
-              {prediction ? prediction.note : (isMr ? 'राधानगरी तालुका • मॉडेल आउटपुट' : 'Radhanagari Taluka • model output')}
+              {prediction ? prediction.note : (isMr ? 'सजणी • मॉडेल आउटपुट' : 'Sajani • model output')}
             </p>
           </div>
 

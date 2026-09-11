@@ -227,7 +227,7 @@ function ParamAppShell() {
                     ? `${prediction.state} • Elev: ${prediction.elevation_m.toFixed(0)}m • ${prediction.inside_validated_band ? 'Validated' : 'Extrapolated'}`
                     : 'Kolhapur, Maharashtra'}
                 </p>
-                {domainFallbackNote && (
+                {domainFallbackNote && prediction?.in_domain === false && (
                   <p className="text-[10px] text-amber-700 font-medium pl-6 truncate mt-0.5">
                     {domainFallbackNote}
                   </p>

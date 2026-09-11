@@ -1,6 +1,7 @@
 import React from 'react';
 import { PARAM_LOGO_URL } from '../data/mockData';
 import { AppLanguage, FarmerProfile } from '../types';
+import { useAgromet } from '../context/AgrometContext';
 
 interface HeaderProps {
   title?: string;
@@ -18,7 +19,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   title = 'PARAM',
-  subtitle = 'Shiroli GP, Radhanagari, Kolhapur',
+  subtitle,
   badge = '',
   onBack,
   language,
@@ -29,6 +30,8 @@ export const Header: React.FC<HeaderProps> = ({
   farmerProfile,
   showBack = false,
 }) => {
+  const { prediction } = useAgromet();
+  const resolvedSubtitle = subtitle !== undefined ? subtitle : (prediction ? `${prediction.name}, ${prediction.state}` : 'Sajani, MH');
   return (
     <header className="fixed top-0 inset-x-0 z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe">
       <div className="h-16 px-4 flex items-center justify-between gap-2">
@@ -63,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="material-symbols-outlined text-[14px] text-secondary shrink-0">
                 location_on
               </span>
-              <span className="truncate">{subtitle}</span>
+              <span className="truncate">{resolvedSubtitle}</span>
             </div>
           </div>
         </div>

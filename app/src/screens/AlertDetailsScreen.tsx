@@ -3,6 +3,7 @@ import { AppLanguage, AppScreen } from '../types';
 import { CropScannerModal } from '../components/CropScannerModal';
 import { RICE_DISEASE_IMAGE } from '../data/mockData';
 import { playSpeech } from '../utils/audio';
+import { useAgromet } from '../context/AgrometContext';
 
 interface AlertDetailsScreenProps {
   onBack: () => void;
@@ -15,6 +16,7 @@ export const AlertDetailsScreen: React.FC<AlertDetailsScreenProps> = ({
   language,
 }) => {
   const isMr = language === 'mr';
+  const { prediction } = useAgromet();
   const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   const handleAudioAlert = () => {
@@ -50,7 +52,7 @@ export const AlertDetailsScreen: React.FC<AlertDetailsScreenProps> = ({
                 <span>{isMr ? 'रोग अनुकूल धोका सूचना' : 'Disease Conducive Risk'}</span>
               </h1>
               <span className="text-[11px] text-on-surface-variant">
-                {isMr ? 'राधानगरी तालुका • उच्च धोका' : 'Radhanagari Taluka • High Risk'}
+                {prediction ? `${prediction.name}, ${prediction.state}` : (isMr ? 'सजणी, महाराष्ट्र' : 'Sajani, MH')} • {isMr ? 'उच्च धोका' : 'High Risk'}
               </span>
             </div>
           </div>

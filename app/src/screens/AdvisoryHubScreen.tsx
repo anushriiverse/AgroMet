@@ -4,6 +4,8 @@ import { Header } from '../components/Header';
 import { BottomNav } from '../components/BottomNav';
 import { playSpeech } from '../utils/audio';
 
+import { useAgromet } from '../context/AgrometContext';
+
 interface AdvisoryHubScreenProps {
   activeCrop: CropItem;
   onOpenCropSelector: () => void;
@@ -21,6 +23,7 @@ export const AdvisoryHubScreen: React.FC<AdvisoryHubScreenProps> = ({
   onToggleLanguage,
   onOpenProfile,
 }) => {
+  const { prediction } = useAgromet();
   const isMr = language === 'mr';
 
   const handleAudioHub = () => {
@@ -42,7 +45,7 @@ export const AdvisoryHubScreen: React.FC<AdvisoryHubScreenProps> = ({
       {/* Header */}
       <Header
         title={isMr ? 'कृषी सल्ला केंद्र (Advisory Hub)' : 'Advisory Hub'}
-        subtitle="Radhanagari, Kolhapur (MH)"
+        subtitle={prediction ? `${prediction.name}, ${prediction.state}` : 'Sajani, MH'}
         badge="Live AI"
         language={language}
         onToggleLanguage={onToggleLanguage}

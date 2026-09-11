@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppLanguage, FarmerProfile } from '../types';
 import { playSpeech } from '../utils/audio';
+import { useAgromet } from '../context/AgrometContext';
 
 interface FarmerProfileSetupScreenProps {
   farmerProfile: FarmerProfile;
@@ -20,6 +21,7 @@ export const FarmerProfileSetupScreen: React.FC<FarmerProfileSetupScreenProps> =
   language,
 }) => {
   const isMr = language === 'mr';
+  const { prediction } = useAgromet();
 
   const [name, setName] = useState(farmerProfile.name || 'Rajesh Patil');
   const [mobile, setMobile] = useState(farmerProfile.mobile || '9823451090');
@@ -120,8 +122,7 @@ export const FarmerProfileSetupScreen: React.FC<FarmerProfileSetupScreenProps> =
                   </span>
                 </div>
                 <p className="text-xs font-semibold text-primary truncate">
-                  {farmerProfile.village || 'Shiroli'}, {farmerProfile.taluka || 'Radhanagari'} (
-                  {farmerProfile.district || 'Kolhapur'})
+                  {prediction ? `${prediction.name}, ${prediction.state}` : `${farmerProfile.village || 'Sajani'}, ${farmerProfile.district || 'MH'}`}
                 </p>
               </div>
             </div>

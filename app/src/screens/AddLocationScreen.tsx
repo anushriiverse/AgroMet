@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppLanguage, FarmerProfile } from '../types';
 import { playSpeech } from '../utils/audio';
+import { useAgromet } from '../context/AgrometContext';
 
 interface AddLocationScreenProps {
   farmerProfile: FarmerProfile;
@@ -18,6 +19,7 @@ export const AddLocationScreen: React.FC<AddLocationScreenProps> = ({
   language,
 }) => {
   const isMr = language === 'mr';
+  const { prediction } = useAgromet();
   const [locating, setLocating] = useState(false);
   const [gpsLocked, setGpsLocked] = useState(false);
 
@@ -33,20 +35,22 @@ export const AddLocationScreen: React.FC<AddLocationScreenProps> = ({
     setTimeout(() => {
       setLocating(false);
       setGpsLocked(true);
-      setDistrict('Kolhapur');
-      setTaluka('Radhanagari');
-      setVillage('Shiroli');
-      setPanchayat('Radhanagari Gram Panchayat');
+      const locName = prediction ? prediction.name : 'Sajani';
+      const locState = prediction ? prediction.state : 'MH';
+      setDistrict(prediction ? prediction.state : 'Kolhapur');
+      setTaluka(prediction ? prediction.name : 'Radhanagari');
+      setVillage(prediction ? prediction.name : 'Shiroli');
+      setPanchayat(prediction ? `${prediction.name} Gram Panchayat` : 'Radhanagari Gram Panchayat');
       onUpdateProfile({
-        district: 'Kolhapur',
-        taluka: 'Radhanagari',
-        village: 'Shiroli',
-        panchayat: 'Radhanagari Gram Panchayat',
+        district: prediction ? prediction.state : 'Kolhapur',
+        taluka: prediction ? prediction.name : 'Radhanagari',
+        village: prediction ? prediction.name : 'Shiroli',
+        panchayat: prediction ? `${prediction.name} Gram Panchayat` : 'Radhanagari Gram Panchayat',
       });
       playSpeech(
         isMr
-          ? 'स्थान शोधले: शिरोली ग्रामपंचायत, राधानगरी, कोल्हापूर.'
-          : 'Location identified: Shiroli GP, Radhanagari, Kolhapur.',
+          ? `स्थान शोधले: ${locName}, ${locState}.`
+          : `Location identified: ${locName}, ${locState}.`,
         isMr ? 'mr' : 'en'
       );
     }, 1000);
@@ -140,8 +144,8 @@ export const AddLocationScreen: React.FC<AddLocationScreenProps> = ({
               <p className="text-xs text-on-surface-variant">
                 {gpsLocked
                   ? isMr
-                    ? 'स्थान लॉक झाले: शिरोली, राधानगरी'
-                    : 'Locked: Shiroli GP, Radhanagari'
+                    ? `स्थान लॉक झाले: ${prediction ? prediction.name : 'सजणी'}`
+                    : `Locked: ${prediction ? `${prediction.name}, ${prediction.state}` : 'Sajani, MH'}`
                   : isMr
                   ? 'मोबाईल GPS द्वारे स्थान शोधा'
                   : 'Locate via device GPS'}

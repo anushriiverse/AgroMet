@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppLanguage, FarmerProfile } from '../types';
 import { playSpeech } from '../utils/audio';
+import { useAgromet } from '../context/AgrometContext';
 
 interface FarmerProfileViewScreenProps {
   farmerProfile: FarmerProfile;
@@ -20,7 +21,7 @@ export const FarmerProfileViewScreen: React.FC<FarmerProfileViewScreenProps> = (
   onChangeLocation,
 }) => {
   const isMr = language === 'mr';
-
+  const { prediction } = useAgromet();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(farmerProfile.name);
   const [mobile, setMobile] = useState(farmerProfile.mobile);
@@ -36,14 +37,15 @@ export const FarmerProfileViewScreen: React.FC<FarmerProfileViewScreenProps> = (
   };
 
   const handleAudio = () => {
+    const loc = prediction ? `${prediction.name}, ${prediction.state}` : `${farmerProfile.village || 'Sajani'}, ${farmerProfile.district || 'MH'}`;
     if (isMr) {
       playSpeech(
-        `शेतकरी प्रोफाईल: ${farmerProfile.name}, राधानगरी कोल्हापूर. एकूण शेती क्षेत्र ${farmerProfile.farmArea} ${farmerProfile.farmAreaUnit}.`,
+        `शेतकरी प्रोफाईल: ${farmerProfile.name}, ${loc}. एकूण शेती क्षेत्र ${farmerProfile.farmArea} ${farmerProfile.farmAreaUnit}.`,
         'mr'
       );
     } else {
       playSpeech(
-        `Farmer Profile: ${farmerProfile.name}, Radhanagari Kolhapur. Total farm area ${farmerProfile.farmArea} ${farmerProfile.farmAreaUnit}.`,
+        `Farmer Profile: ${farmerProfile.name}, ${loc}. Total farm area ${farmerProfile.farmArea} ${farmerProfile.farmAreaUnit}.`,
         'en'
       );
     }

@@ -31,12 +31,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const handleAudioGreeting = () => {
     if (isMr) {
       playSpeech(
-        `नमस्ते ${farmerDisplayName}. राधानगरीमध्ये आज अंशतः ढगाळ हवामान राहील. दुपारपर्यंत खत देणे सोयीचे ठरेल.`,
+        `नमस्ते ${farmerDisplayName}. ${prediction ? prediction.name : 'सजणी'}मध्ये आज अंशतः ढगाळ हवामान राहील. दुपारपर्यंत खत देणे सोयीचे ठरेल.`,
         'mr'
       );
     } else {
       playSpeech(
-        `Namaste ${farmerDisplayName}. In Radhanagari, expect partly cloudy skies today with 28 degrees Celsius. Please apply fertilizers before 2 PM.`,
+        `Namaste ${farmerDisplayName}. In ${prediction ? prediction.name : 'Sajani'}, expect partly cloudy skies today with 28 degrees Celsius. Please apply fertilizers before 2 PM.`,
         'en'
       );
     }
@@ -61,7 +61,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       {/* Header */}
       <Header
         title={isMr ? 'PARAM | परम' : 'PARAM'}
-        subtitle={prediction ? `${prediction.name}, ${prediction.state}` : `${farmerProfile.village || 'Shiroli GP'}, ${farmerProfile.taluka || 'Radhanagari'}`}
+        subtitle={prediction ? `${prediction.name}, ${prediction.state}` : 'Sajani, MH'}
         badge="PARAM"
         language={language}
         onToggleLanguage={onToggleLanguage}
@@ -94,7 +94,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   </span>
                   <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-white tracking-tight">
                     {isMr ? 'नमस्ते,' : 'Namaste,'}
-                    <span className="block mt-0.5 text-secondary-fixed">{farmerDisplayName} (demo profile)</span>
+                    <span className="block mt-0.5 text-secondary-fixed">{farmerDisplayName}</span>
                   </h1>
                 </div>
                 <div className="flex items-center gap-1 mt-1 text-surface-bright/90">
@@ -102,7 +102,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     location_on
                   </span>
                   <span className="text-xs truncate">
-                    {farmerProfile.panchayat || 'Radhanagari Gram Panchayat'} (demo profile)
+                    {prediction ? `${prediction.name}, ${prediction.state}` : 'Sajani, MH'}
                   </span>
                 </div>
               </div>
@@ -257,8 +257,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 </div>
                 <p className="text-xs text-on-error-container mt-1 font-medium leading-relaxed">
                   {isMr
-                    ? 'राधानगरी तालुक्यात उद्या दुपारी मध्यम ते मुसळधार वादळी पावसाची शक्यता. शेतात पाणी साचू नये म्हणून चारी काढावी.'
-                    : 'Moderate to Heavy Thunderstorms expected tomorrow afternoon across Radhanagari taluka. Secure harvested produce and clear farm drainage channels.'}
+                    ? `${prediction ? prediction.name : 'सजणी'} परिसरात उद्या दुपारी मध्यम ते मुसळधार वादळी पावसाची शक्यता. शेतात पाणी साचू नये म्हणून चारी काढावी.`
+                    : `Moderate to Heavy Thunderstorms expected tomorrow afternoon across ${prediction ? `${prediction.name}, ${prediction.state}` : 'Sajani, MH'}. Secure harvested produce and clear farm drainage channels.`}
                 </p>
               </div>
             </div>
@@ -496,7 +496,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <span className="material-symbols-outlined text-[15px] text-secondary">
                   satellite_alt
                 </span>
-                <span>{isMr ? 'राधानगरी उपग्रह ड्रोन निरीक्षण' : 'Radhanagari Satellite Drone Pass'}</span>
+                <span>{isMr ? 'उपग्रह ड्रोन सर्वेक्षण' : `${prediction ? prediction.name : 'Sajani'} Satellite Drone Pass`}</span>
               </div>
               <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white text-xs">
                 <span className="font-semibold">

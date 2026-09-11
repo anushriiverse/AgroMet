@@ -3,6 +3,7 @@ import { AppLanguage, AppScreen, CropItem } from '../types';
 import { Header } from '../components/Header';
 import { BottomNav } from '../components/BottomNav';
 import { playSpeech } from '../utils/audio';
+import { useAgromet } from '../context/AgrometContext';
 
 interface MyCropsScreenProps {
   crops: CropItem[];
@@ -23,12 +24,13 @@ export const MyCropsScreen: React.FC<MyCropsScreenProps> = ({
   onToggleLanguage,
   onOpenProfile,
 }) => {
+  const { prediction } = useAgromet();
   const isMr = language === 'mr';
 
   const handleAudioSummary = () => {
     if (isMr) {
       playSpeech(
-        `तुमच्या शेतात सध्या ${crops.length} पिके नोंदवलेली आहेत: भात आणि गहू. भाताचे पीक शाकीय वाढीच्या टप्प्यात आहे.`,
+        `तुमच्याकडे ${crops.length} सक्रिय नोंदणीकृत पिके आहेत: भात आणि गहू. भात सध्या फुटवे फुटण्याच्या अवस्थेत आहे.`,
         'mr'
       );
     } else {
@@ -44,7 +46,7 @@ export const MyCropsScreen: React.FC<MyCropsScreenProps> = ({
       {/* Header */}
       <Header
         title={isMr ? 'माझी पिके (My Crops)' : 'My Crops'}
-        subtitle="Radhanagari, Kolhapur"
+        subtitle={prediction ? `${prediction.name}, ${prediction.state}` : 'Sajani, MH'}
         badge={`${crops.length} Active`}
         language={language}
         onToggleLanguage={onToggleLanguage}
