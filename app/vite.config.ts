@@ -6,6 +6,7 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
+    optimizeDeps: { exclude: ['maplibre-gl'] },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

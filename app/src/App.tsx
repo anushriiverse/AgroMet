@@ -1,5 +1,6 @@
-import { AgrometProvider } from './context/AgrometContext';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { AgrometProvider, useAgromet } from './context/AgrometContext';
+import { MapBackground } from './components/MapBackground';
 import { AppLanguage, AppScreen, FarmerProfile, CropItem } from './types';
 import { DEFAULT_FARMER_PROFILE, INITIAL_CROPS } from './data/mockData';
 import { LanguageModal } from './components/LanguageModal';
@@ -23,6 +24,33 @@ import { AlertDetailsScreen } from './screens/AlertDetailsScreen';
 import { FarmerProfileViewScreen } from './screens/FarmerProfileViewScreen';
 
 export default function App() {
+  return (
+    <AgrometProvider>
+      <ParamAppShell />
+    </AgrometProvider>
+  );
+}
+
+function ParamAppShell() {
+  const { prediction, currentCoords, setLocation } = useAgromet();
+  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY.current === null) return;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    if (deltaY < -30) {
+      setSheetOpen(true);
+    } else if (deltaY > 30) {
+      setSheetOpen(false);
+    }
+    touchStartY.current = null;
+  };
+
   // Application State with LocalStorage fallbacks
   const [language, setLanguage] = useState<AppLanguage>(() => {
     const saved = localStorage.getItem('param_lang');
@@ -115,10 +143,111 @@ export default function App() {
     crops.find((c) => c.id === activeAdvisoryCropId) || crops[0] || INITIAL_CROPS[0];
 
   return (
-    <AgrometProvider>
-      <div className="w-full min-h-screen bg-surface flex justify-center">
-      {/* Mobile Frame Container: responsive, max-w-md to mirror exact Stitch mobile app preview */}
-      <div className="w-full max-w-md min-h-screen bg-surface flex flex-col relative shadow-2xl overflow-hidden border-x border-outline-variant/10">
+    <div className="w-full h-screen overflow-hidden relative bg-transparent pointer-events-none">
+      {/* 1. MapBackground mounted once as first child */}
+      <MapBackground center={currentCoords} onPick={setLocation} />
+
+      {/* 2. AppSheet wrapping the PARAM app */}
+      <div
+        className="app-sheet pointer-events-auto"
+        style={{
+          position: 'fixed',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          bottom: 0,
+          width: '100%',
+          maxWidth: '430px',
+          zIndex: 10,
+          borderRadius: '24px 24px 0 0',
+          background: 'rgba(255, 255, 255, 0.92)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.18)',
+          height: sheetOpen ? '92vh' : '140px',
+          transition: 'height 300ms cubic-bezier(0.32, 0.72, 0, 1)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        {/* PEEK STATE (sheetOpen = false): height 140px */}
+        {!sheetOpen && (
+          <div
+            className="w-full h-full flex flex-col justify-between p-4 cursor-pointer select-none"
+            onClick={() => setSheetOpen(true)}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            {/* 40px drag handle / grab bar */}
+            <div className="w-full flex justify-center pt-1 pb-2">
+              <div className="w-10 h-1.5 bg-neutral-400/70 rounded-full" />
+            </div>
+
+            {/* Current village name + taluka line and current temp */}
+            <div className="flex items-center justify-between pb-3 px-1">
+              <div className="min-w-0 flex-1 pr-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[20px] text-primary">location_on</span>
+                  <h3 className="text-base font-bold text-neutral-900 truncate">
+                    {prediction ? prediction.name : 'Kolhapur (M Corp.)'}
+                  </h3>
+                </div>
+                <p className="text-xs text-neutral-600 truncate pl-6">
+                  {prediction
+                    ? `${prediction.state} • Elev: ${prediction.elevation_m.toFixed(0)}m • ${prediction.inside_validated_band ? 'Validated' : 'Extrapolated'}`
+                    : 'Kolhapur, Maharashtra'}
+                </p>
+              </div>
+
+              <div className="text-right shrink-0">
+                <span className="text-2xl font-black text-neutral-900">
+                  {prediction ? `${prediction.temp_c.toFixed(1)}°C` : '24.4°C'}
+                </span>
+                <span className="block text-[10px] text-neutral-500 font-medium">
+                  seasonal mean (JJAS)
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* FULL STATE (sheetOpen = true): height 92vh */}
+        {sheetOpen && (
+          <div className="w-full h-full flex flex-col relative overflow-hidden">
+            {/* Top drag bar / chevron to collapse */}
+            <div
+              className="w-full h-8 shrink-0 flex items-center justify-between px-4 cursor-pointer select-none bg-surface/90 border-b border-outline-variant/20 z-50"
+              onClick={() => setSheetOpen(false)}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              title="Tap or drag down to view map"
+            >
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-600 truncate">
+                <span className="material-symbols-outlined text-[16px] text-primary">location_on</span>
+                <span className="truncate">{prediction ? `${prediction.name}, ${prediction.state}` : 'PARAM'}</span>
+              </div>
+
+              {/* 40px grab bar */}
+              <div className="w-10 h-1.5 bg-neutral-400/70 rounded-full" />
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSheetOpen(false);
+                }}
+                className="text-neutral-500 hover:text-neutral-800 flex items-center p-0.5 rounded"
+                aria-label="Collapse sheet"
+              >
+                <span className="material-symbols-outlined text-[20px]">keyboard_arrow_down</span>
+              </button>
+            </div>
+
+            {/* Scrollable PARAM column: all 16 screens + bottom nav */}
+            <div
+              className="flex-1 overflow-y-auto overscroll-contain relative min-h-0"
+              style={{ transform: 'translateZ(0)' }}
+            >
         {/* Render Screen according to currentScreen */}
         {currentScreen === 'splash' && (
           <SplashScreen
@@ -286,8 +415,10 @@ export default function App() {
             setIsLanguageModalOpen(false);
           }}
         />
+            </div>
+          </div>
+        )}
       </div>
     </div>
-    </AgrometProvider>
   );
 }

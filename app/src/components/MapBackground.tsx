@@ -70,5 +70,11 @@ export const MapBackground: React.FC<MapBackgroundProps> = ({ center, onPick }) 
     }
   }, [center.lat, center.lon]);
 
-  return <div ref={containerRef} className="fixed inset-0 z-0" />;
+  return (
+    <div
+      ref={containerRef}
+      className="fixed inset-0 z-0 pointer-events-auto"
+      style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 0 }}
+    />
+  );
 };

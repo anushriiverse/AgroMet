@@ -47,7 +47,10 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (info) setModelInfoData(info);
     });
 
-    // 2. Geolocation on mount
+    // 2. Immediately fetch default location so prediction is never null
+    fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
+
+    // 3. Geolocation refinement if available
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -64,17 +67,13 @@ export const AgrometProvider: React.FC<{ children: React.ReactNode }> = ({ child
             fetchPredictionForLocation(lat, lon);
           } else {
             setIsOutOfDomain(true);
-            fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
           }
         },
         () => {
-          setIsOutOfDomain(false);
-          fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
+          // Denied or timeout: default already loaded
         },
         { timeout: 5000 }
       );
-    } else {
-      fetchPredictionForLocation(DEFAULT_COORDS.lat, DEFAULT_COORDS.lon);
     }
   }, [fetchPredictionForLocation]);
 

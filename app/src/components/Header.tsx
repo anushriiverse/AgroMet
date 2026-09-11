@@ -19,7 +19,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   title = 'PARAM',
   subtitle = 'Shiroli GP, Radhanagari, Kolhapur',
-  badge = 'PARAM',
+  badge = '',
   onBack,
   language,
   onToggleLanguage,

@@ -139,6 +139,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     <span className="text-4xl font-extrabold tracking-tighter text-white">{prediction ? `${prediction.temp_c.toFixed(1)}°` : "28°"}</span>
                     <span className="text-lg text-secondary-fixed font-bold">C</span>
                   </div>
+                  <span className="text-xs text-surface-bright/80 font-medium">seasonal mean (JJAS)</span>
                   <p className="text-sm font-semibold text-surface-bright flex items-center gap-1.5 mt-0.5">
                     {isMr ? 'अंशतः ढगाळ' : 'Partly Cloudy'}
                   </p>
@@ -159,7 +160,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     humidity_percentage
                   </span>
                   <span className="text-[11px] text-surface-bright/90 mt-0.5">
-                    {isMr ? 'आर्द्रता' : 'Humidity'}
+                    {isMr ? 'आर्द्रता (DEMO)' : 'Humidity (DEMO)'}
                   </span>
                   <span className="text-sm font-bold text-white">78%</span>
                 </div>
@@ -168,7 +169,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     air
                   </span>
                   <span className="text-[11px] text-surface-bright/90 mt-0.5">
-                    {isMr ? 'वारा' : 'Wind'}
+                    {isMr ? 'वारा (DEMO)' : 'Wind (DEMO)'}
                   </span>
                   <span className="text-sm font-bold text-white">12 km/h</span>
                 </div>
@@ -177,7 +178,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     rainy
                   </span>
                   <span className="text-[11px] text-surface-bright/90 mt-0.5">
-                    {isMr ? 'पाऊस शक्यता' : 'Rain Chance'}
+                    {isMr ? 'पाऊस शक्यता (DEMO)' : 'Rain Chance (DEMO)'}
                   </span>
                   <span className="text-sm font-bold text-tertiary-fixed">65%</span>
                 </div>

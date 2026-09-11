@@ -4,7 +4,6 @@ import { Header } from '../components/Header';
 import { BottomNav } from '../components/BottomNav';
 import { DEFAULT_WEATHER_DAYS, DEMO_FIELDS_NOTE } from '../data/mockData';
 import { playSpeech } from '../utils/audio';
-import { MapBackground } from '../components/MapBackground';
 import { useAgromet } from '../context/AgrometContext';
 
 interface WeatherScreenProps {
@@ -43,16 +42,12 @@ export const WeatherScreen: React.FC<WeatherScreenProps> = ({
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-transparent flex flex-col justify-between overflow-x-hidden text-on-surface pointer-events-none">
-      {/* Map Background fixed behind content */}
-      <MapBackground center={currentCoords} onPick={setLocation} />
-
+    <div className="relative w-full min-h-screen bg-transparent flex flex-col justify-between overflow-x-hidden text-on-surface">
       {/* Header Container */}
-      <div className="relative z-10 pointer-events-auto">
+      <div className="relative z-10">
         <Header
           title={prediction ? `${prediction.name}, ${prediction.state}` : (isMr ? 'हवामान अंदाज (७ दिवस)' : '7-Day Weather')}
           subtitle={prediction ? `Elevation: ${prediction.elevation_m.toFixed(0)}m • ${prediction.inside_validated_band ? 'Validated Band' : 'Outside Band'}` : 'Radhanagari, Kolhapur (MH)'}
-          badge="Live"
           language={language}
           onToggleLanguage={onToggleLanguage}
           onOpenProfile={onOpenProfile}
@@ -61,15 +56,15 @@ export const WeatherScreen: React.FC<WeatherScreenProps> = ({
       </div>
 
       {/* Main Container */}
-      <main className="relative z-10 flex-1 w-full pt-16 pb-24 px-5 space-y-4 pointer-events-none">
+      <main className="relative z-10 flex-1 w-full pt-16 pb-24 px-5 space-y-4">
         {/* Title Bar with Audio Guide */}
-        <div className="flex items-center justify-between pt-3 pointer-events-auto">
+        <div className="flex items-center justify-between pt-3">
           <div>
             <h1 className="font-headline-sm text-headline-sm font-bold text-primary drop-shadow-xs">
               {prediction ? `${prediction.name} Forecast` : (isMr ? 'स्थानिक हवामान अंदाज' : 'Local Forecast')}
             </h1>
             <p className="text-xs text-on-surface-variant drop-shadow-xs">
-              {prediction ? prediction.note : (isMr ? 'राधानगरी तालुका • IMD उपग्रह संकलन' : 'Radhanagari Taluka • IMD High-Res Radar')}
+              {prediction ? prediction.note : (isMr ? 'राधानगरी तालुका • मॉडेल आउटपुट' : 'Radhanagari Taluka • model output')}
             </p>
           </div>
 
@@ -162,10 +157,10 @@ export const WeatherScreen: React.FC<WeatherScreenProps> = ({
                 )}
               </div>
 
-              <h2 className="text-3xl font-extrabold tracking-tight mt-2 text-white flex items-baseline gap-2">
+              <h2 className="text-3xl font-extrabold tracking-tight mt-2 text-white flex flex-col items-start">
                 <span>{prediction ? `${prediction.temp_c.toFixed(1)}°C` : `${activeDay.tempHigh}°C`}</span>
-                <span className="text-base text-surface-bright/80 font-semibold">
-                  / {activeDay.tempLow}°C Min
+                <span className="text-xs text-surface-bright/80 font-medium mt-0.5">
+                  seasonal mean (JJAS)
                 </span>
               </h2>
               <p className="text-sm font-semibold text-secondary-fixed flex items-center gap-1.5 mt-1">
